@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>來猜歌吧！｜送舊活動互動猜歌遊戲</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --text:#eaf0ff;
+      --muted:#9bb0ff;
+      --border:rgba(255,255,255,.12);
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --radius:18px;
+      --radius2:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang TC", "Noto Sans TC", Arial;
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(109,40,217,.35), transparent 55%),
+                  radial-gradient(1100px 700px at 90% 25%, rgba(29,78,216,.28), transparent 52%),
+                  radial-gradient(900px 700px at 50% 90%, rgba(16,185,129,.18), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .wrap{width:min(980px,100%)}
+    header{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    h1{
+      margin:0;
+      font-size:clamp(22px,3vw,30px);
+      letter-spacing:.5px;
+      line-height:1.1;
+    }
+    .sub{color:rgba(234,240,255,.78); font-size:14px; line-height:1.35}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+    }
+    @media (max-width: 860px){
+      .grid{grid-template-columns:1fr}
+      header{flex-direction:column}
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+    }
+    .card .hd .label{font-weight:700}
+    .card .bd{padding:16px}
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:rgba(234,240,255,.9);
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+    button{
+      appearance:none;
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:650;
+      letter-spacing:.2px;
+      transition: transform .06s ease, background .2s ease, opacity .2s ease;
+      user-select:none;
+    }
+    button:hover{background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.03));}
+    button:active{transform:translateY(1px)}
+    button:disabled{opacity:.45; cursor:not-allowed}
+
+    .btn-primary{
+      border-color: rgba(124,58,237,.55);
+      background:linear-gradient(180deg, rgba(124,58,237,.45), rgba(124,58,237,.12));
+    }
+    .btn-good{
+      border-color: rgba(16,185,129,.55);
+      background:linear-gradient(180deg, rgba(16,185,129,.35), rgba(16,185,129,.10));
+    }
+    .btn-warn{
+      border-color: rgba(245,158,11,.55);
+      background:linear-gradient(180deg, rgba(245,158,11,.30), rgba(245,158,11,.08));
+    }
+    .btn-danger{
+      border-color: rgba(239,68,68,.55);
+      background:linear-gradient(180deg, rgba(239,68,68,.30), rgba(239,68,68,.08));
+    }
+
+    input[type="text"]{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+      color:var(--text);
+      outline:none;
+      font-size:15px;
+    }
+    input[type="text"]:focus{border-color:rgba(155,176,255,.55)}
+
+    .status{
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      padding:12px;
+      line-height:1.55;
+      min-height:54px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .status strong{font-weight:800}
+    .status .msg{flex:1; color:rgba(234,240,255,.92)}
+    .status .tag{font-size:12px; color:rgba(234,240,255,.72)}
+
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace}
+
+    .tiny{font-size:12px; color:rgba(234,240,255,.72)}
+    .help{
+      margin-top:10px;
+      padding:12px;
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,.22);
+      background:rgba(255,255,255,.02);
+      color:rgba(234,240,255,.82);
+      line-height:1.6;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .smallcard{
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.14);
+      border-radius:16px;
+      padding:12px;
+    }
+    .smallcard h3{margin:0 0 8px 0; font-size:14px}
+    .smallcard p{margin:0; font-size:13px; color:rgba(234,240,255,.78); line-height:1.55}
+
+    .progress{
+      height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(124,58,237,.95), rgba(16,185,129,.85));
+      transition:width .15s linear;
+    }
+
+    .footer{
+      margin-top:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color:rgba(234,240,255,.65);
+      font-size:12px;
+    }
+    a{color:rgba(155,176,255,.95)}
+    .kbd{
+      padding:.15em .45em;
+      border:1px solid rgba(255,255,255,.2);
+      border-bottom-width:2px;
+      border-radius:8px;
+      background:rgba(255,255,255,.06);
+      font-size:12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>🎵 來猜歌吧！</h1>
+        <div class="sub">主持人一鍵操作｜隨機播放｜每段 30 秒｜全場一起喊答案</div>
+      </div>
+      <div class="row">
+        <span class="pill">📁 歌曲資料夾：<span class="mono">/songs/</span></span>
+        <span class="pill">⏱️ 每次播放：<strong id="segLabel">30</strong>s</span>
+        <span class="pill">🎲 不重複：<strong id="remaining">0</strong> 首剩餘</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Main -->
+      <section class="card">
+        <div class="hd">
+          <div class="label">遊戲控制台</div>
+          <div class="row">
+            <button id="btnPick" class="btn-primary">來一首</button>
+            <button id="btnReset" class="btn-danger" title="重設所有歌曲為未播放">重設</button>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="status" aria-live="polite">
+            <div class="msg" id="statusMsg">請先按 <strong>來一首</strong> 抽題目。</div>
+            <div class="tag" id="roundTag">Round —</div>
+          </div>
+
+          <div style="margin:12px 0 10px">
+            <div class="progress" title="本段 30 秒進度">
+              <div class="bar" id="bar"></div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-bottom:10px">
+            <button id="btnStart" class="btn-good" disabled>開始</button>
+            <button id="btnContinue" class="btn-warn" disabled>繼續</button>
+            <button id="btnReveal" disabled>看答案</button>
+            <button id="btnStop" disabled>暫停</button>
+          </div>
+
+          <div class="row" style="margin:10px 0 8px">
+            <div style="flex:1; min-width:240px">
+              <input id="guess" type="text" placeholder="輸入你猜的歌名（可按 Enter 送出）" autocomplete="off" />
+            </div>
+            <button id="btnGuess" class="btn-primary" disabled>猜歌</button>
+          </div>
+
+          <div class="help">
+            <div class="tiny">✅ 建議主持人口播：</div>
+            <ul style="margin:6px 0 0 18px; padding:0">
+              <li>按 <strong>開始</strong> 播放 30 秒，大家一起猜！</li>
+              <li>猜不到就按 <strong>繼續</strong> 再聽 30 秒。</li>
+              <li>全場真的想不到就按 <strong>看答案</strong> 揭曉。</li>
+              <li>每首歌只會出現一次；想重玩請按 <strong>重設</strong>。</li>
+            </ul>
+          </div>
+
+          <audio id="audio" preload="metadata"></audio>
+
+          <div class="footer">
+            <div>快捷鍵：<span class="kbd">Enter</span> 送出猜歌｜<span class="kbd">Space</span> 播放/暫停</div>
+            <div class="mono" id="debug"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Side -->
+      <aside class="card">
+        <div class="hd">
+          <div class="label">現場設定</div>
+          <div class="pill">🎛️ 可離線使用</div>
+        </div>
+        <div class="bd">
+          <div class="list">
+            <div class="smallcard">
+              <h3>① 準備歌曲</h3>
+              <p>在同一層目錄建立 <span class="mono">songs</span> 資料夾，放入多首 <span class="mono">.mp3</span>（或 <span class="mono">.wav</span>）。<br>檔名就是歌名：例如 <span class="mono">告白氣球.mp3</span></p>
+            </div>
+            <div class="smallcard">
+              <h3>② 設定歌單</h3>
+              <p>因瀏覽器安全限制，單一 HTML 無法自動讀資料夾內容；請到程式碼中找到 <span class="mono">SONG_FILES</span> 陣列，把檔名填進去即可。</p>
+            </div>
+            <div class="smallcard">
+              <h3>③ 現場播放建議</h3>
+              <p>用筆電接音響、Chrome 全螢幕。播放按鈕由主持人控制，全場用喊的或用手機/白板輸入皆可。</p>
+            </div>
+            <div class="smallcard">
+              <h3>常見問題</h3>
+              <p><strong>Q：</strong> 點開始沒聲音？<br><strong>A：</strong> 先按一次按鈕觸發播放權限、音量調大、確認音訊格式支援。</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * 來猜歌吧！單一網頁版
+     *
+     * ⚠️ 重要：瀏覽器基於安全性，無法直接列出 /songs 目錄內容。
+     *     你需要在下面 SONG_FILES 手動填入歌曲檔名（檔名=正確歌名）。
+     *
+     * 使用方式：
+     * 1) 將此檔案存為 index.html
+     * 2) 建立 songs/ 資料夾，放入歌曲檔
+     * 3) 在 SONG_FILES 填入檔名，例如 "告白氣球.mp3"
+     * 4) 用本機伺服器開啟（建議）：
+     *    - VSCode Live Server
+     *    - 或命令列：python -m http.server 8000
+     */
+
+    // ✅ 在這裡填入你的歌曲檔名（檔名即歌名）
+    const SONG_FILES = [
+      "好好先生.mp3",
+      "告白氣球.mp3",
+      "等你下課.mp3",
+      "缺口.mp3",
+      "蝸牛.mp3",
+    ];
+
+    // 每段播放秒數（可調）
+    const SEGMENT_SECONDS = 30;
+
+    // ------- DOM -------
+    const $ = (sel) => document.querySelector(sel);
+    const btnPick = $("#btnPick");
+    const btnReset = $("#btnReset");
+    const btnStart = $("#btnStart");
+    const btnContinue = $("#btnContinue");
+    const btnReveal = $("#btnReveal");
+    const btnStop = $("#btnStop");
+    const btnGuess = $("#btnGuess");
+    const guessInput = $("#guess");
+    const statusMsg = $("#statusMsg");
+    const roundTag = $("#roundTag");
+    const audio = $("#audio");
+    const bar = $("#bar");
+    const remainingEl = $("#remaining");
+    const segLabel = $("#segLabel");
+    const debugEl = $("#debug");
+
+    segLabel.textContent = String(SEGMENT_SECONDS);
+
+    // ------- State -------
+    /** @type {string[]} */
+    let pool = [];            // 未播放歌曲
+    /** @type {string|null} */
+    let currentFile = null;   // 目前歌曲檔名
+    let currentAnswer = null; // 目前答案（檔名去副檔名）
+    let round = 0;
+
+    // segment timer
+    let segTimer = null;
+    let segStartAt = 0;
+    let segTargetMs = SEGMENT_SECONDS * 1000;
+
+    // ------- Helpers -------
+    function setStatus(html){
+      statusMsg.innerHTML = html;
+    }
+
+    function setRoundTag(text){
+      roundTag.textContent = text;
+    }
+
+    function setRemaining(){
+      remainingEl.textContent = String(pool.length);
+    }
+
+    function resetProgress(){
+      bar.style.width = "0%";
+    }
+
+    function startProgress(){
+      // progress uses requestAnimationFrame driven by interval for simplicity
+      const start = performance.now();
+      const duration = segTargetMs;
+      const tick = () => {
+        const now = performance.now();
+        const t = Math.min(1, (now - start) / duration);
+        bar.style.width = (t * 100).toFixed(1) + "%";
+        if (t < 1 && !audio.paused) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+
+    function normalize(s){
+      return (s || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        // 常見符號差異簡單處理
+        .replace(/[“”"'’]/g, "")
+        .replace(/[！!]/g, "")
+        .replace(/[？?]/g, "")
+        .replace(/[．。]/g, "")
+        .replace(/[，,]/g, "")
+        .replace(/[：:]/g, "");
+    }
+
+    function fileToTitle(filename){
+      return filename.replace(/\.[^/.]+$/, "");
+    }
+
+    function enable(el, yes){
+      el.disabled = !yes;
+    }
+
+    function stopSegmentTimer(){
+      if (segTimer) {
+        clearTimeout(segTimer);
+        segTimer = null;
+      }
+    }
+
+    function pauseAudio(){
+      stopSegmentTimer();
+      try{ audio.pause(); }catch{}
+      enable(btnStop, false);
+    }
+
+    function scheduleAutoPause(){
+      stopSegmentTimer();
+      segStartAt = Date.now();
+      segTimer = setTimeout(() => {
+        pauseAudio();
+        setStatus("⏸️ 本段播放結束！<strong>可以猜歌</strong> 或按 <strong>繼續</strong> 再聽一段。");
+        enable(btnContinue, true);
+        enable(btnGuess, true);
+        enable(btnReveal, true);
+      }, SEGMENT_SECONDS * 1000);
+    }
+
+    function updateButtonsForPicked(){
+      enable(btnStart, true);
+      enable(btnContinue, false);
+      enable(btnGuess, true);
+      enable(btnReveal, true);
+      enable(btnStop, false);
+    }
+
+    function updateButtonsForPlaying(){
+      enable(btnStart, false);
+      enable(btnContinue, false);
+      enable(btnGuess, true);
+      enable(btnReveal, true);
+      enable(btnStop, true);
+    }
+
+    function updateButtonsForIdleNoSong(){
+      enable(btnStart, false);
+      enable(btnContinue, false);
+      enable(btnGuess, false);
+      enable(btnReveal, false);
+      enable(btnStop, false);
+    }
+
+    function ensurePool(){
+      if (!Array.isArray(SONG_FILES) || SONG_FILES.length === 0) {
+        pool = [];
+        setRemaining();
+        setStatus("⚠️ 目前尚未設定歌曲清單。請到程式碼中填入 <span class=\"mono\">SONG_FILES</span> 陣列後再使用。");
+        updateButtonsForIdleNoSong();
+        return false;
+      }
+      if (pool.length === 0) pool = [...SONG_FILES];
+      setRemaining();
+      return true;
+    }
+
+    function pickSong(){
+      if (!ensurePool()) return;
+
+      if (pool.length === 0) {
+        setStatus("✅ 所有歌曲都播放過了！可按 <strong>重設</strong> 再玩一輪。");
+        updateButtonsForIdleNoSong();
+        return;
+      }
+
+      // random pick
+      const idx = Math.floor(Math.random() * pool.length);
+      currentFile = pool.splice(idx, 1)[0];
+      currentAnswer = fileToTitle(currentFile);
+      round += 1;
+
+      audio.src = "songs/" + encodeURIComponent(currentFile);
+      audio.currentTime = 0;
+      resetProgress();
+
+      setRemaining();
+      setRoundTag("Round " + round);
+      setStatus("🎲 已抽出題目！按 <strong>開始</strong> 播放第一段 30 秒。");
+
+      updateButtonsForPicked();
+
+      // debug (可刪)
+      debugEl.textContent = "";
+    }
+
+    async function playSegment(){
+      if (!currentFile) return;
+
+      // 某些瀏覽器需要由使用者互動觸發，這裡已在按鈕事件內
+      try{
+        updateButtonsForPlaying();
+        await audio.play();
+        setStatus("▶️ 播放中…（30 秒後自動暫停）");
+        scheduleAutoPause();
+        startProgress();
+      }catch(err){
+        updateButtonsForPicked();
+        setStatus("⚠️ 無法播放音訊。請確認：檔案存在於 songs/、格式支援、並用本機伺服器開啟（不要用直接點檔案）。");
+        debugEl.textContent = String(err && err.message ? err.message : err);
+      }
+    }
+
+    function checkGuess(){
+      if (!currentAnswer) return;
+      const user = normalize(guessInput.value);
+      const ans = normalize(currentAnswer);
+
+      if (!user) {
+        setStatus("⌨️ 請先輸入歌名再按 <strong>猜歌</strong>。");
+        return;
+      }
+
+      if (user === ans) {
+        pauseAudio();
+        setStatus("🎉 <strong>答對了！</strong> 這首歌是：<span class=\"mono\">" + escapeHtml(currentAnswer) + "</span>。按 <strong>來一首</strong> 進入下一題！");
+        // 本題結束：清空欄位
+        guessInput.value = "";
+        currentFile = null;
+        currentAnswer = null;
+        resetProgress();
+        // 允許下一題
+        enable(btnStart, false);
+        enable(btnContinue, false);
+        enable(btnGuess, false);
+        enable(btnReveal, false);
+        enable(btnStop, false);
+        // 若還有歌，保持可抽
+        enable(btnPick, true);
+        setRemaining();
+      } else {
+        setStatus("❌ <strong>答錯了</strong>，再聽一點吧！可以按 <strong>繼續</strong> 再播 30 秒。");
+        enable(btnContinue, true);
+        enable(btnReveal, true);
+      }
+    }
+
+    function reveal(){
+      if (!currentAnswer) return;
+      pauseAudio();
+      setStatus("🔍 正確答案是：<span class=\"mono\">" + escapeHtml(currentAnswer) + "</span>。按 <strong>來一首</strong> 進入下一題！");
+      guessInput.value = "";
+      currentFile = null;
+      currentAnswer = null;
+      resetProgress();
+      enable(btnStart, false);
+      enable(btnContinue, false);
+      enable(btnGuess, false);
+      enable(btnReveal, false);
+      enable(btnStop, false);
+      enable(btnPick, true);
+      setRemaining();
+    }
+
+    function resetGame(){
+      pauseAudio();
+      pool = [...SONG_FILES];
+      currentFile = null;
+      currentAnswer = null;
+      round = 0;
+      resetProgress();
+      setRemaining();
+      setRoundTag("Round —");
+      if (!Array.isArray(SONG_FILES) || SONG_FILES.length === 0) {
+        setStatus("⚠️ 請先在程式碼中設定 <span class=\"mono\">SONG_FILES</span>（歌曲檔名清單）。");
+        updateButtonsForIdleNoSong();
+      } else {
+        setStatus("🔄 已重設！按 <strong>來一首</strong> 開始抽歌。");
+        updateButtonsForIdleNoSong();
+        enable(btnPick, true);
+      }
+      guessInput.value = "";
+      debugEl.textContent = "";
+    }
+
+    // ------- Safety: escape -------
+    function escapeHtml(str){
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // ------- Events -------
+    btnPick.addEventListener("click", () => {
+      pickSong();
+    });
+
+    btnStart.addEventListener("click", () => {
+      playSegment();
+    });
+
+    btnContinue.addEventListener("click", () => {
+      playSegment();
+    });
+
+    btnStop.addEventListener("click", () => {
+      pauseAudio();
+      setStatus("⏸️ 已暫停。可按 <strong>開始</strong>/<strong>繼續</strong> 再播放一段。");
+      enable(btnStart, true);
+      enable(btnContinue, true);
+    });
+
+    btnGuess.addEventListener("click", () => {
+      // 使用者按猜歌時先暫停音樂
+      if (!audio.paused) {
+        pauseAudio();
+        setStatus("⏸️ 已暫停播放，正在判斷答案…");
+      }
+      checkGuess();
+    });
+
+    btnReveal.addEventListener("click", () => {
+      reveal();
+    });
+
+    btnReset.addEventListener("click", () => {
+      resetGame();
+    });
+
+    guessInput.addEventListener("keydown", (e) => {
+      // 使用者開始輸入時先暫停音樂
+      if (!audio.paused) {
+        pauseAudio();
+        setStatus("⏸️ 已暫停播放，請輸入歌名後按 Enter 或『猜歌』。");
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (!btnGuess.disabled) checkGuess();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      // 避免在輸入框按空白鍵被攔截
+      const isTyping = document.activeElement === guessInput;
+      if (!isTyping && e.code === "Space") {
+        e.preventDefault();
+        if (!currentFile) return;
+        if (audio.paused) {
+          playSegment();
+        } else {
+          pauseAudio();
+          setStatus("⏸️ 已暫停。可按 <strong>開始</strong>/<strong>繼續</strong> 再播放一段。");
+          enable(btnStart, true);
+          enable(btnContinue, true);
+        }
+      }
+    });
+
+    // 音訊播完（如果歌曲短於 30 秒）
+    audio.addEventListener("ended", () => {
+      stopSegmentTimer();
+      enable(btnContinue, false);
+      enable(btnStop, false);
+      setStatus("🏁 歌曲已播完！可以直接猜歌或按 <strong>看答案</strong>。");
+      enable(btnGuess, true);
+      enable(btnReveal, true);
+      bar.style.width = "100%";
+    });
+
+    // 初始化
+    resetGame();
+
+  </script>
+</body>
+</html>
